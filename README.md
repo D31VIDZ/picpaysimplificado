@@ -4,6 +4,7 @@ projeto criado sobre um desafio de vaga backend para a empresa picpay
 https://www.linkedin.com/in/deivid-zioto-6735b9289/
 
 API para gerenciar transações bancarias (CRUD) que faz parte de um treino pessoal.
+Validando o tipo do usuario onde o MERCHANT nao pode fazer transações só receber e validando o valor da conta do usurario o balance. Não tem validação do email ou senha apenas demonstrativo.
 
 Tecnologias
 
@@ -33,3 +34,9 @@ Remover user http DELETE :8080/users/1
 
 [ {  "id": 1, "firstName":"newName", "lastName": "name 2", "document" : "15345687", "email": "email@gmail.com", "password" : "password", "balance": 150, "userType": "commom" } ] 
 [ ]
+
+Criar transações $ http POST :8080/transactions senderId=1 receiverId=2 amount=50
+
+[ { "id": 1, "senderId" : 1, "receiverId": 2, "amount": 50, "dateTime": 15/10/2023 } ] 
+
+Listar transações $ http GET :8080/transactions
