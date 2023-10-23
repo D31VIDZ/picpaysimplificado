@@ -8,7 +8,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Setter
+@Getter
 @Entity
 @Table(name = "transactions")
 public class Transaction {
@@ -25,46 +33,4 @@ public class Transaction {
 	
 	private LocalDateTime dateTime;
 
-	public Transaction() {
-	}
-	
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Long getSenderId() {
-		return senderId;
-	}
-
-	public void setSenderId(Long senderId) {
-		this.senderId = senderId;
-	}
-
-	public Long getReceiverId() {
-		return receiverId;
-	}
-
-	public void setReceiverId(Long receiverId) {
-		this.receiverId = receiverId;
-	}
-
-	public BigDecimal getAmount() {
-		return amount;
-	}
-
-	public void setAmount(BigDecimal amount) {
-		this.amount = amount;
-	}
-
-	public LocalDateTime getDateTime() {
-		return dateTime;
-	}
-
-	public void setDateTime(LocalDateTime dateTime) {
-		this.dateTime = dateTime;
-	}
 }
