@@ -48,6 +48,8 @@ Listar transações $ http GET :8080/api/transactions
 
 Todas transações recebidas e enviadas do usuario por id  $ http GET :8080/api/transactions/usuario/{id do usuario}
 
-Atualizar transações com logica de extorno de dinheiro $ http PUT :8080/api/transactions/{id}
+Atualizar transações com logica de extorno de dinheiro $ http PUT :8080/api/transactions/{id} senderId=1 receiverId=2 amount=55
+
+[ { "id": 1, "senderId" : 1, "receiverId": 2, "amount": 55, "dateTime": 15/10/2023 } ]
 
 Apagar transação com logica de extorno de dinheiro $ http DELETE :8080/api/transactions/{id}
