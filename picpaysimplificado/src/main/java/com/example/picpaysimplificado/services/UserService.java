@@ -2,6 +2,7 @@ package com.example.picpaysimplificado.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,28 +17,75 @@ public class UserService {
 	@Autowired
 	UserRepository repository;
 	
-	public List<User> getAllUsers(){
+	public List<UserDTO> getAllUsers(){
 		List<User> users = repository.findAll();
-		return users;
+		List<UserDTO> userDTOS = users.stream()
+								.map(u ->
+										new UserDTO(u.getFirstName(),
+												u.getLastName(),
+												u.getEmail(),
+												u.getDocument(),
+												u.getPassword(),
+												u.getBalance(),
+												u.getUserType())).collect(Collectors.toList());
+		return userDTOS;
 	}
 	
-	public Optional<User> getById(Long id) throws Exception{
+	public UserDTO getById(Long id) throws Exception{
 		Optional<User> user = repository.findById(id);
 		if(user.isEmpty()) {
 			throw new Exception("Usuario não encontrado.");
-		}else {			
-			return user;
 		}
+		User user1 = user.get();
+
+		UserDTO userDTO = new UserDTO(user1.getFirstName(),
+										user1.getLastName(),
+										user1.getEmail(),
+										user1.getDocument(),
+										user1.getPassword(),
+										user1.getBalance(),
+										user1.getUserType());
+
+			return userDTO;
+	}
+
+	public UserDTO getByDocument(String ducoment) throws Exception{
+		Optional<User> user = repository.findUserByDocument(ducoment);
+		if(user.isEmpty()) {
+			throw new Exception("Usuario não encontrado.");
+		}
+		User user1 = user.get();
+
+		UserDTO userDTO = new UserDTO(user1.getFirstName(),
+				user1.getLastName(),
+				user1.getEmail(),
+				user1.getDocument(),
+				user1.getPassword(),
+				user1.getBalance(),
+				user1.getUserType());
+
+			return userDTO;
 	}
 	
-	public User createUser(UserDTO user) {
+	public UserDTO createUser(UserDTO user) {
 		User newUser = new User(user);
 		repository.save(newUser);
-		return newUser;
+		return user;
+	}
+
+	public UserDTO updateUser(Long id, UserDTO userDTO) throws Exception {
+		UserDTO userDTO1 = this.getById(id);
+
+		User user = new User(userDTO1);
+		repository.save(user);
+
+		return userDTO;
 	}
 	
-	public User deleteUser(User user) {
-		repository.delete(user);
-		return user;
+	public UserDTO deleteUser(Long id) throws Exception {
+		UserDTO userDTO = this.getById(id);
+		repository.deleteById(id);
+
+		return userDTO;
 	}
 }

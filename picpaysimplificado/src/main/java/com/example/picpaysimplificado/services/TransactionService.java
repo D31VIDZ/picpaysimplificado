@@ -2,6 +2,7 @@ package com.example.picpaysimplificado.services;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,17 +25,39 @@ import com.example.picpaysimplificado.repositories.UserRepository;
 public class TransactionService {
 
 	@Autowired
-	TransactionRepository repository;
+	private TransactionRepository repository;
 	
 	@Autowired
-	UserRepository userRepository;
+	private UserRepository userRepository;
 	
 	@Autowired
-	RestTemplate template;
+	private RestTemplate template;
 	
 	public List<Transaction> getAll(){
-		List<Transaction> trans = repository.findAll();
-		return trans;
+		List<Transaction> transactions = repository.findAll();
+		return transactions;
+	}
+
+	public List<Transaction> getAllTransactionsByIdUser(Long id) throws Exception {
+		Optional<User> user = userRepository.findById(id);
+
+		if(user.isEmpty()) {
+			throw new Exception("usuario não encontrado! Id invalido");
+		}
+
+		List<Transaction> transactionsse = repository.findBySenderId(id);
+
+		List<Transaction> transactionsre = repository.findByReceiverId(id);
+
+		if(transactionsre.isEmpty() && transactionsse.isEmpty()) {
+			throw new Exception("Usuario não tem transações.");
+		}
+
+		List<Transaction> transactions = new ArrayList<>();
+				transactions.addAll(transactionsse);
+				transactions.addAll(transactionsre);
+
+		return transactions;
 	}
 	
 	public Transaction createTransaction(Transaction trans) throws Exception {
@@ -53,18 +76,10 @@ public class TransactionService {
 		
 		if(valid == true) {
 			User senderUSer = sender.get();
-			BigDecimal BalanceSender = senderUSer.getBalance();	
-			BigDecimal newBalanceSender = BalanceSender.subtract(trans.getAmount());
-			senderUSer.setBalance(newBalanceSender);
-			
 			User receiverUSer = receiver.get();
-			BigDecimal BalanceReceiver = receiverUSer.getBalance();	
-			BigDecimal newBalanceRe = BalanceReceiver.add(trans.getAmount());
-			receiverUSer.setBalance(newBalanceRe);
-		
-		trans.setDateTime(LocalDateTime.now());
-		userRepository.save(senderUSer);
-		userRepository.save(receiverUSer);
+
+			this.createtransactionUser(senderUSer, receiverUSer, trans);
+
 		repository.save(trans);
 		
 		}
@@ -82,15 +97,92 @@ public class TransactionService {
 				throw new Exception("Saldo insulficiente");
 			}
 			
-			ResponseEntity<Map> authorization = template.getForEntity("https://run.mocky.io/v3/8fafdd68-a090-496f-8c9a-3442cf30dae6", Map.class);
-			
-			if(authorization.getStatusCode() == HttpStatus.OK && authorization.getBody().get("messege") == "Autorizado") {
-				
+			//ResponseEntity<Map> authorization = template.getForEntity("https://run.mocky.io/v3/8fafdd68-a090-496f-8c9a-3442cf30dae6", Map.class);
+			//if(authorization.getStatusCode() == HttpStatus.OK && authorization.getBody().get("messege") == "Autorizado") {
+
 				return true;
-			}
+
 			}
 			
 		return false;
 	}
-		
+
+
+	public Transaction update(Long id, Transaction transaction) throws Exception {
+		Optional<Transaction> optionalTransaction = repository.findById(id);
+
+		if(optionalTransaction.isEmpty()){
+			throw new Exception("transação não encontrada");
+		}
+
+		Transaction oldTransaction = optionalTransaction.get();
+
+		Optional<User> senderUSer = userRepository.findById(oldTransaction.getSenderId());
+		User sender = senderUSer.get();
+
+		Optional<User> receiverUSer = userRepository.findById(oldTransaction.getReceiverId());
+		User receiver = receiverUSer.get();
+
+		this.deletetransactionUser(sender, receiver, oldTransaction);
+
+		this.createtransactionUser(sender, receiver, transaction);
+
+		return transaction;
+	}
+	public Transaction delete(Long id) throws Exception {
+		Optional<Transaction> optionalTransaction = repository.findById(id);
+
+		if(optionalTransaction.isEmpty()){
+			throw new Exception("transação não encontrada");
+		}
+
+		Transaction transaction = optionalTransaction.get();
+
+		BigDecimal amount = transaction.getAmount();
+
+		Optional<User> senderUSer = userRepository.findById(transaction.getSenderId());
+		User sender = senderUSer.get();
+
+		Optional<User> receiverUSer = userRepository.findById(transaction.getReceiverId());
+		User receiver = receiverUSer.get();
+
+		this.deletetransactionUser(sender, receiver, transaction);
+
+		repository.deleteById(id);
+
+		return transaction;
+	}
+
+	private Transaction createtransactionUser(User sender, User receiver, Transaction transaction){
+
+		BigDecimal BalanceSender = sender.getBalance();
+		BigDecimal newBalanceSender = BalanceSender.subtract(transaction.getAmount());
+		sender.setBalance(newBalanceSender);
+
+		BigDecimal BalanceReceiver = receiver.getBalance();
+		BigDecimal newBalanceRe = BalanceReceiver.add(transaction.getAmount());
+		receiver.setBalance(newBalanceRe);
+
+		transaction.setDateTime(LocalDateTime.now());
+		userRepository.save(sender);
+		userRepository.save(receiver);
+		repository.save(transaction);
+
+		return transaction;
+	}
+
+	private Transaction deletetransactionUser(User sender, User receiver, Transaction transaction){
+		BigDecimal balanceSender = sender.getBalance();
+		BigDecimal newBalanceSender = balanceSender.add(transaction.getAmount());
+		sender.setBalance(newBalanceSender);
+
+		BigDecimal balanceReceiver = receiver.getBalance();
+		BigDecimal newBalanceRe = balanceReceiver.subtract(transaction.getAmount());
+		receiver.setBalance(newBalanceRe);
+
+		userRepository.save(sender);
+		userRepository.save(receiver);
+
+		return transaction;
+	}
 }
