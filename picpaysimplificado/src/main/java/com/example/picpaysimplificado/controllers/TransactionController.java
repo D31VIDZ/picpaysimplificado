@@ -36,7 +36,7 @@ public class TransactionController {
 	@PostMapping
 	public ResponseEntity<Transaction> createTransaction(@RequestBody @Valid Transaction transaction) throws Exception{
 		Transaction newTrans = service.createTransaction(transaction);
-		
+
 		return new ResponseEntity<>(newTrans, HttpStatus.CREATED);
 	}
 
