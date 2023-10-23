@@ -8,39 +8,54 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.picpaysimplificado.dots.UserDTO;
 import com.example.picpaysimplificado.entities.User;
 import com.example.picpaysimplificado.services.UserService;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
 	@Autowired
 	UserService service;
 	
 	@GetMapping
-	public ResponseEntity<List<User>> getAll(){
-		List<User> users = service.getAllUsers();
-		return ResponseEntity.ok(users);
+	public ResponseEntity<List<UserDTO>> getAll(){
+		List<UserDTO> usersDtos = service.getAllUsers();
+		return ResponseEntity.ok(usersDtos);
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<Optional<User>> getById(@PathVariable Long id) throws Exception{
-		Optional<User> user = service.getById(id);
+	public ResponseEntity<UserDTO> getById(@PathVariable Long id) throws Exception{
+		UserDTO user = service.getById(id);
 		return ResponseEntity.ok(user);
 	}
-	
+
+	@GetMapping("/document/{document}")
+	public ResponseEntity<UserDTO> getBydocument(@PathVariable String document) throws Exception{
+		UserDTO user = service.getByDocument(document);
+		return ResponseEntity.ok(user);
+	}
+
 	@PostMapping
-	public ResponseEntity<User> createUser(@RequestBody @Valid UserDTO user){
-		User newUSer = service.createUser(user);
-		return new ResponseEntity<>(newUSer, HttpStatus.OK);
+	public ResponseEntity<UserDTO> createUser(@RequestBody @Valid UserDTO userDTO){
+		UserDTO newUSerDto = service.createUser(userDTO);
+		return new ResponseEntity<>(newUSerDto, HttpStatus.CREATED);
+	}
+
+	@PutMapping("/{id}")
+	public ResponseEntity<UserDTO> updateUser(@PathVariable Long id,@RequestBody @Valid UserDTO userDTO) throws Exception {
+		UserDTO userDTO1 = service.updateUser(id, userDTO);
+
+		return new ResponseEntity<>(userDTO1, HttpStatus.CREATED);
+	}
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<UserDTO> delete(@PathVariable Long id) throws Exception {
+		UserDTO userDTO = service.deleteUser(id);
+
+		return new ResponseEntity<>(userDTO, HttpStatus.OK);
 	}
 }
