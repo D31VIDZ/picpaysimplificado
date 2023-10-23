@@ -3,6 +3,7 @@ package com.example.picpaysimplificado.entities;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.example.picpaysimplificado.dots.TransactionDTO;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,4 +34,9 @@ public class Transaction {
 	
 	private LocalDateTime dateTime;
 
+	public Transaction(TransactionDTO transactionDTO) {
+		this.senderId = transactionDTO.senderId();
+		this.receiverId = transactionDTO.receiverId();
+		this.amount = transactionDTO.amount();
+	}
 }
