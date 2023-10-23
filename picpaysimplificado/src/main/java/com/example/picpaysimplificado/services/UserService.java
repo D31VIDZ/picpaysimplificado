@@ -36,6 +36,9 @@ public class UserService {
 		if(user.isEmpty()) {
 			throw new Exception("Usuario não encontrado.");
 		}
+		if(user == null){
+		throw new Exception("id nulo");
+		}
 		User user1 = user.get();
 
 		UserDTO userDTO = new UserDTO(user1.getFirstName(),
@@ -69,8 +72,12 @@ public class UserService {
 	
 	public UserDTO createUser(UserDTO user) {
 		User newUser = new User(user);
-		repository.save(newUser);
+		this.save(newUser);
 		return user;
+	}
+
+	public void save(User user){
+		repository.save(user);
 	}
 
 	public UserDTO updateUser(Long id, UserDTO userDTO) throws Exception {
